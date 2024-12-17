@@ -232,3 +232,66 @@ ganges :-
 
 indus :-
     write("Package suitable to you is Indus."), nl.
+
+
+
+
+//**SODUKU GAME**//
+
+
+
+# Define the Sudoku board
+board = [
+    [0, 2, 0, 5, 0, 1, 0, 9, 0],
+    [8, 0, 0, 2, 0, 3, 0, 0, 6],
+    [0, 3, 0, 0, 6, 0, 0, 7, 0],
+    [0, 0, 1, 0, 0, 0, 6, 0, 0],
+    [5, 4, 0, 0, 0, 0, 0, 1, 9],
+    [0, 0, 2, 0, 0, 0, 7, 0, 0],
+    [0, 9, 0, 0, 3, 0, 0, 8, 0],
+    [2, 0, 0, 8, 0, 4, 0, 0, 7],
+    [0, 1, 0, 9, 0, 7, 0, 6, 0]
+]
+
+# Function to check if placing a number in a cell is valid
+def is_valid(board, row, col, num):
+    # Check the row
+    for x in range(9):
+        if board[row][x] == num:
+            return False
+    
+    # Check the column
+    for x in range(9):
+        if board[x][col] == num:
+            return False
+    
+    # Check the 3x3 grid
+    start_row, start_col = 3 * (row // 3), 3 * (col // 3)
+    for i in range(3):
+        for j in range(3):
+            if board[start_row + i][start_col + j] == num:
+                return False
+    
+    return True
+
+# Function to solve the Sudoku board using backtracking
+def solve_sudoku(board):
+    for row in range(9):
+        for col in range(9):
+            if board[row][col] == 0:
+                for num in range(1, 10):
+                    if is_valid(board, row, col, num):
+                        board[row][col] = num
+                        if solve_sudoku(board):
+                            return True
+                        board[row][col] = 0
+                return False
+    return True
+
+# Call the function to solve the Sudoku and print the board
+if solve_sudoku(board):
+    for row in board:
+        print(row)
+else:
+    print("No solution exists")
+
