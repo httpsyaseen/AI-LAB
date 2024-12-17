@@ -1,0 +1,234 @@
+
+/**GENETIC ALGORITHM**/
+
+import random
+
+class GeneticAlgo:
+    def __init__(self, individual_size, population_size, mutation_rate, crossover_rate):
+        self.individual_size = individual_size
+        self.population_size = population_size
+        self.mutation_rate = mutation_rate
+        self.crossover_rate = crossover_rate
+        self.population = self.initialize_population()
+
+    def initialize_population(self):
+        return [''.join(random.choice('01') for _ in range(self.individual_size)) for _ in range(self.population_size)]
+
+    def fitness_function(self, individual):
+        return sum(int(bit) for bit in individual)
+
+    def select_parents(self):
+        fitness_scores = {ind: self.fitness_function(ind) for ind in self.population}
+        sorted_population = sorted(self.population, key=lambda ind: fitness_scores[ind], reverse=True)
+        return sorted_population[:len(self.population) // 2]
+
+    def crossover(self, parent1, parent2):
+        point = random.randint(1, self.individual_size - 1)
+        return parent1[:point] + parent2[point:]
+
+    def mutate(self, individual):
+        return ''.join(
+            char if random.random() > self.mutation_rate else str(1 - int(char))
+            for char in individual
+        )
+
+    def generate_children(self):
+        parents = self.select_parents()
+        next_generation = []
+
+        while len(next_generation) < self.population_size:
+            parent1, parent2 = random.sample(parents, 2)
+            if random.random() < self.crossover_rate:
+                child = self.crossover(parent1, parent2)
+            else:
+                child = random.choice([parent1, parent2])
+
+            child = self.mutate(child)
+            next_generation.append(child)
+
+        self.population = next_generation
+
+    def run(self):
+        generation = 0
+        while True:
+            fitness_scores = {ind: self.fitness_function(ind) for ind in self.population}
+
+            print(f"Generation {generation}:")
+            for individual, fitness in fitness_scores.items():
+                print(f"  Individual: {individual}, Fitness: {fitness}")
+
+            for individual, fitness in fitness_scores.items():
+                if fitness == self.individual_size:  # Desired fitness value
+                    print(f"Found individual with fitness {self.individual_size} in generation {generation}")
+                    return individual
+
+            self.generate_children()
+            generation += 1
+
+# Example usage
+if __name__ == "__main__":
+    individual_size, population_size = 8, 10
+    mutation_rate, crossover_rate = 0.03, 0.8
+
+    instance = GeneticAlgo(individual_size, population_size, mutation_rate, crossover_rate)
+    result = instance.run()
+    print(f"Best individual: {result} with fitness: {instance.fitness_function(result)}")
+
+
+/**CSP**/
+
+def print_solution(board):
+    """Function to print the chessboard."""
+    for row in board:
+        print(" ".join("Q" if cell else "." for cell in row))
+    print("\n")
+
+
+def is_safe(board, row, col, n):
+    """
+    Check if placing a queen at (row, col) is safe.
+    Ensures no queens in the same column, row, or diagonal.
+    """
+    # Check column
+    for i in range(row):
+        if board[i][col]:
+            return False
+    
+    # Check upper-left diagonal
+    for i, j in zip(range(row, -1, -1), range(col, -1, -1)):
+        if board[i][j]:
+            return False
+    
+    # Check upper-right diagonal
+    for i, j in zip(range(row, -1, -1), range(col, n)):
+        if board[i][j]:
+            return False
+    
+    return True
+
+
+def solve_n_queens_util(board, row, n):
+    """Utility function to solve N-Queens using backtracking."""
+    if row >= n:
+        print_solution(board)
+        return True  # Prints one solution
+
+    res = False
+    for col in range(n):
+        if is_safe(board, row, col, n):
+            board[row][col] = 1  # Place queen
+            res = solve_n_queens_util(board, row + 1, n) or res
+            board[row][col] = 0  # Backtrack and remove queen
+
+    return res
+
+
+def solve_n_queens(n):
+    """Main function to solve the N-Queens problem."""
+    board = [[0 for _ in range(n)] for _ in range(n)]
+    if not solve_n_queens_util(board, 0, n):
+        print("No solution exists")
+    else:
+        print("Solution(s) found!")
+
+
+# Solve the 4-Queens problem
+solve_n_queens(4)
+
+
+
+/**PROLOG**/
+
+% Define the main start goal to ask for the date and month
+start :-
+    write("Enter your birth day and month:"), nl,
+    write("What is your birth day (1-31): "), read(Day),
+    write("What is your birth month (1-12): "), read(Month),
+    get_zodiac_sign(Month, Day).
+
+% Check the zodiac sign based on the month and day
+get_zodiac_sign(Month, Day) :-
+    (Month = 1, Day >= 20 ; Month = 2, Day =< 19) -> aquarius;
+    (Month = 2, Day >= 20 ; Month = 3, Day =< 20) -> pisces;
+    (Month = 3, Day >= 21 ; Month = 4, Day =< 19) -> aries;
+    (Month = 4, Day >= 20 ; Month = 5, Day =< 20) -> taurus;
+    (Month = 5, Day >= 21 ; Month = 6, Day =< 20) -> gemini;
+    (Month = 6, Day >= 21 ; Month = 7, Day =< 22) -> cancer;
+    (Month = 7, Day >= 23 ; Month = 8, Day =< 22) -> leo;
+    (Month = 8, Day >= 23 ; Month = 9, Day =< 22) -> virgo;
+    (Month = 9, Day >= 23 ; Month = 10, Day =< 22) -> libra;
+    (Month = 10, Day >= 23 ; Month = 11, Day =< 21) -> scorpio;
+    (Month = 11, Day >= 22 ; Month = 12, Day =< 21) -> sagittarius;
+    (Month = 12, Day >= 22 ; Month = 1, Day =< 19) -> capricorn;
+    write("No suitable zodiac sign found."), nl.
+
+% Define messages and descriptions for each zodiac sign
+aquarius :-
+    write("Your zodiac sign is Aquarius."), nl,
+    write("Aquarius is an air sign, known for being innovative, independent, and humanitarian."), nl.
+
+pisces :-
+    write("Your zodiac sign is Pisces."), nl,
+    write("Pisces is a water sign, characterized by empathy, intuition, and a deep emotional understanding."), nl.
+
+aries :-
+    write("Your zodiac sign is Aries."), nl,
+    write("Aries is a fire sign, known for its energy, leadership, and adventurous spirit."), nl.
+
+taurus :-
+    write("Your zodiac sign is Taurus."), nl,
+    write("Taurus is an earth sign, known for being reliable, practical, and patient."), nl.
+
+gemini :-
+    write("Your zodiac sign is Gemini."), nl,
+    write("Gemini is an air sign, known for being adaptable, curious, and communicative."), nl.
+
+cancer :-
+    write("Your zodiac sign is Cancer."), nl,
+    write("Cancer is a water sign, known for being emotional, nurturing, and protective."), nl.
+
+leo :-
+    write("Your zodiac sign is Leo."), nl,
+    write("Leo is a fire sign, known for its confidence, creativity, and generosity."), nl.
+
+virgo :-
+    write("Your zodiac sign is Virgo."), nl,
+    write("Virgo is an earth sign, known for its practicality, attention to detail, and analytical nature."), nl.
+
+libra :-
+    write("Your zodiac sign is Libra."), nl,
+    write("Libra is an air sign, known for its balance, fairness, and charm."), nl.
+
+scorpio :-
+    write("Your zodiac sign is Scorpio."), nl,
+    write("Scorpio is a water sign, known for its intensity, passion, and determination."), nl.
+
+sagittarius :-
+    write("Your zodiac sign is Sagittarius."), nl,
+    write("Sagittarius is a fire sign, known for its optimism, freedom-loving spirit, and adventurous nature."), nl.
+
+capricorn :-
+    write("Your zodiac sign is Capricorn."), nl,
+    write("Capricorn is an earth sign, known for its ambition, discipline, and practical mindset."), nl.
+
+
+start :-
+    write("Enter your choice of days and cost:"), nl,
+    write("What is your days limit: "), read(Day),
+    write("What is your cost limit: "), read(Cost),
+    checkpackage(Day, Cost).
+
+checkpackage(Day, Cost) :-
+    Day > 0, Day < 6, Cost = 800, brahamaputra, !;
+    Day > 5, Day < 8, Cost = 1000, ganges, !;
+    Day > 7, Day < 15, Cost = 1500, indus, !;
+    write("No suitable package found."), nl.
+
+brahamaputra :-
+    write("Package suitable to you is Brahamaputra."), nl.
+
+ganges :-
+    write("Package suitable to you is Ganges."), nl.
+
+indus :-
+    write("Package suitable to you is Indus."), nl.
